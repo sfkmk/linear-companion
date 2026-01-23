@@ -1,0 +1,55 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "linear-companion",
+  "title": "Linear Companion",
+  "description": "Open local project folders based on the currently viewed Linear issue.",
+  "icon": "command-icon.png",
+  "author": "sko",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "open-issue-folder",
+      "title": "Open Issue Folder",
+      "description": "Opens the local folder corresponding to the current Linear issue.",
+      "mode": "no-view",
+      "preferences": [
+        {
+            "name": "searchDirectory",
+            "type": "directory",
+            "required": true,
+            "title": "Search Directory",
+            "description": "The root directory to search for project folders recursively.",
+            "label": "Projects Root"
+        }
+      ]
+    },
+    {
+      "name": "copy-issue-id",
+      "title": "Copy Issue ID",
+      "description": "Copy the Issue ID from the active Linear window.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.3",
+    "@raycast/utils": "^2.2.2",
+    "react": "^19.2.3"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.10",
+    "@types/react": "^19.2.9",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
