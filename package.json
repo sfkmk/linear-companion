@@ -20,10 +20,11 @@
         {
             "name": "searchDirectory",
             "type": "directory",
-            "required": true,
+            "required": false,
             "title": "Search Directory",
-            "description": "The root directory to search for project folders recursively.",
-            "label": "Projects Root"
+            "description": "The root directory to search for project folders recursively. Defaults to home directory.",
+            "label": "Projects Root",
+            "default": "~"
         }
       ]
     },

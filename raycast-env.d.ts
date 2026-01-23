@@ -15,7 +15,7 @@ declare type Preferences = ExtensionPreferences
 declare namespace Preferences {
   /** Preferences accessible in the `open-issue-folder` command */
   export type OpenIssueFolder = ExtensionPreferences & {
-  /** Search Directory - The root directory to search for project folders recursively. */
+  /** Search Directory - The root directory to search for project folders recursively. Defaults to home directory. */
   "searchDirectory": string
 }
   /** Preferences accessible in the `copy-issue-id` command */

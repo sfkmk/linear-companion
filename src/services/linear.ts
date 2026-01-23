@@ -5,14 +5,18 @@ import { runAppleScript } from "@raycast/utils";
  * Returns null if Linear is not running or no window is found.
  */
 export async function getLinearWindowTitle(): Promise<string | null> {
+  // Use System Events to inspect the process, which is more reliable for Electron apps
+  // that might not support standard AppleScript dictionary window commands.
   const script = `
-    if application "Linear" is running then
-      tell application "Linear"
-        if (count of windows) > 0 then
-          return name of front window
-        end if
-      end tell
-    end if
+    tell application "System Events"
+      if (count of (processes whose name is "Linear")) > 0 then
+        tell process "Linear"
+          if (count of windows) > 0 then
+            return name of window 1
+          end if
+        end tell
+      end if
+    end tell
     return ""
   `;
 
