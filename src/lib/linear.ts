@@ -29,13 +29,35 @@ export async function getLinearWindowTitle(): Promise<string | null> {
   }
 }
 
+
 /**
- * Parses the Linear Issue ID from a window title.
- * Expected formats: "ENG-123 Fix login bug", "Linear - ENG-123"
+ * Parses both the Issue ID and the Title from the window title.
+ * Returns { id, title } or null if ID is missing.
  */
+export function parseLinearTitle(title: string): { id: string; title: string } | null {
+  // Regex: 2-5 uppercase letters, hyphen, 1-5 digits.
+  const idMatch = title.match(/\b[A-Z]{2,5}-\d{1,5}\b/);
+  
+  if (!idMatch) return null;
+  
+  const id = idMatch[0];
+  
+  // Title is typically everything AFTER the ID.
+  // Example: "ENG-123 Fix login bug" -> "Fix login bug"
+  // Example: "Linear - ENG-123" -> "" (or handle gracefully)
+  
+  // We split by the ID, take the second part, and clean it up.
+  const parts = title.split(id);
+  const rawTitle = parts[1] || "";
+  
+  // Remove leading/trailing separators (like " - " or " ")
+  const cleanTitle = rawTitle.replace(/^[\s-]+/, "").trim();
+
+  return { id, title: cleanTitle };
+}
+
+// Keep backward compatibility for now if needed, or deprecate
 export function extractIssueId(title: string): string | null {
-  // Regex looks for 2-4 uppercase letters, hyphen, 1-5 digits.
-  // e.g. LIN-123, ENG-9941
-  const match = title.match(/\b[A-Z]{2,5}-\d{1,5}\b/);
-  return match ? match[0] : null;
+  const parsed = parseLinearTitle(title);
+  return parsed ? parsed.id : null;
 }

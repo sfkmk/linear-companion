@@ -10,21 +10,49 @@
     "Developer Tools"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "searchDirectory",
+      "type": "directory",
+      "required": false,
+      "title": "Search Directory",
+      "description": "The root directory to search for project folders recursively. Defaults to home directory.",
+      "label": "Projects Root",
+      "default": "~"
+    },
+    {
+      "name": "newFolderLocation",
+      "type": "directory",
+      "required": false,
+      "title": "New Folder Location",
+      "description": "Where new project folders should be created.",
+      "label": "New Folders Root"
+    }
+  ],
   "commands": [
     {
       "name": "open-issue-folder",
       "title": "Open Issue Folder",
       "description": "Opens the local folder corresponding to the current Linear issue.",
-      "mode": "no-view",
-      "preferences": [
+      "mode": "no-view"
+    },
+    {
+      "name": "resolve-issue",
+      "title": "Resolve Issue Folder",
+      "description": "Resolve ambiguity or create missing folders for an issue.",
+      "mode": "view",
+      "arguments": [
         {
-            "name": "searchDirectory",
-            "type": "directory",
-            "required": false,
-            "title": "Search Directory",
-            "description": "The root directory to search for project folders recursively. Defaults to home directory.",
-            "label": "Projects Root",
-            "default": "~"
+          "name": "issueId",
+          "placeholder": "Issue ID",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "issueTitle",
+          "placeholder": "Issue Title",
+          "type": "text",
+          "required": false
         }
       ]
     },

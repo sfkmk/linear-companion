@@ -1,5 +1,5 @@
 import { showToast, Toast, Clipboard } from "@raycast/api";
-import { getLinearWindowTitle, extractIssueId } from "./services/linear";
+import { getLinearWindowTitle, extractIssueId } from "./lib/linear";
 
 export default async function Command() {
   try {

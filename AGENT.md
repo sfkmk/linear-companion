@@ -6,57 +6,59 @@
 ## Core Features
 1.  **Open Issue Folder:** Extracts the Issue ID (e.g., `ENG-123`) from the Linear window title, searches for a matching folder in a user-defined directory, and opens it in Finder.
 2.  **Copy Issue ID:** A utility command to simply extract and copy the Issue ID to the clipboard.
+3.  **Resolve Issue Folder:** A UI-based workflow to handle cases where 0 or multiple folders are found, allowing users to create new project folders or select from matches.
 
 ## Architecture
 
-The project follows a modular service-based architecture within the standard Raycast structure.
+The project follows a modular architecture to promote code reuse and scalability.
 
 ### Directory Structure
 ```
 /src
-  /commands          # (Legacy/unused - commands are now at src root per Raycast convention)
-  /services          # Core business logic and system integrations
-    linear.ts        # AppleScript integration to read Linear.app state
-    finder.ts        # 'mdfind' (Spotlight) wrapper and Finder automation
-  /utils             # Shared utilities (currently empty)
-  open-issue-folder.tsx # Entry point for "Open Issue Folder" command
-  copy-issue-id.tsx     # Entry point for "Copy Issue ID" command
+  /lib               # Domain-specific business logic (e.g., Linear, Filesystem) - NOT 'services'
+  /components        # Reusable UI components
+  /utils             # Generic helper functions
+  open-issue-folder.tsx # Silent entry point for "Open Issue Folder"
+  resolve-issue.tsx     # UI entry point for handling ambiguity/creation
+  copy-issue-id.tsx     # Entry point for "Copy Issue ID"
 ```
 
 ### Key Components
 
-#### `src/services/linear.ts`
+#### `src/lib/linear.ts`
 *   **Purpose:** Interface with the Linear macOS application.
-*   **Mechanism:** Uses AppleScript to fetch the title of the frontmost window of process "Linear".
-*   **Key Function:** `getLinearWindowTitle()` returns the raw title string.
-*   **Key Function:** `extractIssueId(title)` uses Regex (`\b[A-Z]{2,5}-\d{1,5}\b`) to find the ID.
+*   **Mechanism:** Uses AppleScript (System Events) to fetch the title of the frontmost window of process "Linear".
 
-#### `src/services/finder.ts`
-*   **Purpose:** File system search and Finder control.
-*   **Mechanism:** Uses `mdfind` (macOS Spotlight CLI) for instant recursive search.
-*   **Query:** `kMDItemContentType == "public.folder" && kMDItemFSName == "{issueId}"` (Exact name match).
-*   **Key Function:** `findIssueFolder(issueId, rootDir)` returns an array of absolute paths.
-*   **Key Function:** `openFolderInFinder(path)` uses AppleScript to focus Finder and open the path.
+#### `src/lib/finder.ts`
+*   **Purpose:** File system search (`mdfind`) and Finder automation.
+*   **Query:** Prefix match `kMDItemFSName == "{issueId}*"` to support folders named like "ENG-123 Feature Title".
+
+#### `src/lib/folder-creator.ts`
+*   **Purpose:** Logic for creating standardized project folders.
+*   **Note:** Designed to be reused by any future command (e.g., "Create New Issue") that needs to generate a folder structure.
+
+### Architectural Guidelines (Strict)
+
+1.  **Modular Logic (`src/lib`):**
+    *   Place all business logic in `src/lib`.
+    *   **Do not** hardcode logic like "Create Folder" into a specific command's UI. It must be a reusable function in `src/lib`.
+    *   **Reasoning:** Features like "folder creation" are core capabilities that different entry points (commands) might need. Keeping them separate ensures consistency across the extension.
+
+2.  **Reusable Components (`src/components`):**
+    *   Complex UI workflows (like "deciding what to do with an Issue ID") should be encapsulated in components (e.g., `<IssueResolver />`).
+    *   **Reasoning:** If we add a "Create Issue" command later, it can reuse `<IssueResolver />` to handle the folder aspect without duplicating UI code.
+
+3.  **Sub-Agents & Task Management:**
+    *   **Rule:** Agents acting as project leads must use sub-agents for research, documentation lookup, or parallelizable tasks.
+    *   **Rule:** Use `todowrite` extensively to track progress.
+    *   **Reasoning:** This keeps the main agent's context focused on decision-making and implementation details while offloading routine information gathering.
 
 ## Development Workflow
-
-### specific commands
 *   **Build:** `npm run build`
-*   **Dev Loop:** `npm run dev` (Runs the Raycast local development server)
-*   **Lint:** `npm run lint` / `npm run fix-lint`
+*   **Dev Loop:** `npm run dev`
+*   **Lint:** `npm run lint`
 
-### Important Constraints
-1.  **macOS Only:** Relies heavily on AppleScript and Spotlight (`mdfind`).
-2.  **Linear App:** Requires the desktop app, not the web version.
-3.  **Spotlight Indexing:** The target directory *must* be indexed by Spotlight for `mdfind` to work.
-
-## Best Practices for Future Agents
-*   **UI/UX:** Use `showToast` for feedback. Use `Toast.Style.Failure` for errors but keep messages helpful.
-*   **Optimistic UI:** Show "Searching..." toast immediately before kicking off the `mdfind` process.
-*   **Permissions:** Raycast handles AppleScript permissions, but be aware that the first run might prompt the user.
-*   **Path Handling:** Always use absolute paths. The `preferences.searchDirectory` returns an absolute path.
-
-## Future Roadmap (Potential)
-*   **Fuzzy Search:** If exact match fails, try partial matching?
-*   **Multiple Results:** If multiple folders match `ENG-123`, show a list in Raycast for the user to pick one.
-*   **Configurable Regex:** Allow users to define their own project code format if it differs from standard Linear pattern.
+## Best Practices
+*   **UI/UX:** Silent by default (`no-view`). Only show UI (`view`) when user decision is required (0 or >1 results).
+*   **Two-Command Pattern:** Use `launchCommand` to switch from a silent background command to an interactive UI command when needed.
+*   **Preferences:** Use standard Raycast preferences for configuration (e.g., `searchDirectory`, `newFolderLocation`). If a required preference is missing, prompt the user with a Toast to open Settings via `openExtensionPreferences()`.

@@ -1,6 +1,6 @@
-import { showToast, Toast, closeMainWindow, getPreferenceValues } from "@raycast/api";
-import { getLinearWindowTitle, extractIssueId } from "./services/linear";
-import { findIssueFolder, openFolderInFinder } from "./services/finder";
+import { showToast, Toast, closeMainWindow, getPreferenceValues, launchCommand, LaunchType } from "@raycast/api";
+import { getLinearWindowTitle, parseLinearTitle } from "./lib/linear";
+import { findIssueFolder, openFolderInFinder } from "./lib/finder";
 
 interface Preferences {
   searchDirectory: string;
@@ -23,9 +23,9 @@ export default async function Command() {
       return;
     }
 
-    // 2. Extract ID
-    const issueId = extractIssueId(title);
-    if (!issueId) {
+    // 2. Parse ID and Title
+    const parsed = parseLinearTitle(title);
+    if (!parsed) {
       await showToast({
         style: Toast.Style.Failure,
         title: "No Issue ID found",
@@ -34,8 +34,9 @@ export default async function Command() {
       return;
     }
 
+    const { id: issueId, title: issueTitle } = parsed;
+
     // 3. Search for Folder
-    // Optimistic toast
     await showToast({
       style: Toast.Style.Animated,
       title: `Searching for ${issueId}...`,
@@ -43,34 +44,33 @@ export default async function Command() {
 
     const results = await findIssueFolder(issueId, searchDir);
 
-    if (results.length === 0) {
+    // 4. Handle Results
+
+    // Happy Path: Exactly one result
+    if (results.length === 1) {
+      await openFolderInFinder(results[0]);
       await showToast({
-        style: Toast.Style.Failure,
-        title: "Folder not found",
-        message: `No folder named "${issueId}" in search path.`,
+        style: Toast.Style.Success,
+        title: "Opened Folder",
+        message: results[0],
       });
+      await closeMainWindow();
       return;
     }
 
-    if (results.length > 1) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Multiple matches found",
-        message: `Found ${results.length} folders named "${issueId}".`,
-      });
-      // Future: Show a list to pick from
-      return;
-    }
-
-    // 4. Success -> Open
-    await openFolderInFinder(results[0]);
-    await showToast({
-      style: Toast.Style.Success,
-      title: "Opened Folder",
-      message: results[0],
+    // Ambiguous or Missing Path: Launch UI
+    // We launch the 'resolve-issue' command passing the context.
+    await launchCommand({
+      name: "resolve-issue",
+      type: LaunchType.UserInitiated,
+      arguments: {
+        issueId,
+        issueTitle,
+      },
+      context: {
+        foundPaths: results,
+      },
     });
-    
-    await closeMainWindow();
 
   } catch (error) {
     await showToast({
