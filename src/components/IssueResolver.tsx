@@ -1,6 +1,6 @@
 import { Action, ActionPanel, List, Icon, showToast, Toast, openExtensionPreferences, closeMainWindow, useNavigation } from "@raycast/api";
 import React, { useState } from "react";
-import { createIssueFolder, getNewFolderLocation } from "../lib/folder-creator";
+import { buildIssueFolderName, createIssueFolder, getNewFolderLocation } from "../lib/folder-creator";
 import { openFolderInFinder } from "../lib/finder";
 import { CreateFolderForm } from "./CreateFolderForm";
 
@@ -16,7 +16,7 @@ export function IssueResolver({ issueId, issueTitle, foundPaths, isLoading = fal
   const [isCreating, setIsCreating] = useState(false);
   const { push } = useNavigation();
   const displayTitle = issueTitle.trim() || issueId;
-  const proposedFolderName = `${issueId} ${issueTitle}`.trim() || issueId;
+  const suggestedName = buildIssueFolderName(issueId, issueTitle);
 
   if (isLoading) {
     return <List isLoading navigationTitle={`Searching: ${issueId}`} />;
@@ -81,7 +81,7 @@ export function IssueResolver({ issueId, issueTitle, foundPaths, isLoading = fal
       const parentDir = await ensureNewFolderLocation();
       if (!parentDir) return;
 
-      const newPath = await createIssueFolder(parentDir, proposedFolderName);
+      const newPath = await createIssueFolder(parentDir, suggestedName);
       await openFolderInFinder(newPath);
       
       await showToast({
@@ -106,11 +106,12 @@ export function IssueResolver({ issueId, issueTitle, foundPaths, isLoading = fal
     const parentDir = await ensureNewFolderLocation();
     if (!parentDir) return;
 
-    const defaultName = isManual ? `${issueId} ` : proposedFolderName;
+    const defaultName = issueTitle.trim();
 
     push(
       <CreateFolderForm
         parentDir={parentDir}
+        issueId={issueId}
         initialName={defaultName}
         navigationTitle={`Create: ${displayTitle}`}
       />
@@ -138,7 +139,7 @@ export function IssueResolver({ issueId, issueTitle, foundPaths, isLoading = fal
       <List.EmptyView
         icon={Icon.Folder}
         title={`No folder found for ${displayTitle}`}
-        description={`Suggested name: "${proposedFolderName}"`}
+        description={`Suggested name: "${suggestedName}"`}
         actions={
           <ActionPanel>
             {isManual ? createCustomAction : createDefaultAction}

@@ -11,7 +11,9 @@ type ExtensionPreferences = {
   /** Search Directory - The root directory to search for project folders recursively. Defaults to home directory. */
   "searchDirectory": string,
   /** New Folder Location - Where new project folders should be created. */
-  "newFolderLocation"?: string
+  "newFolderLocation"?: string,
+  /** Auto-create Missing Folders - Automatically create a folder when none is found for the current issue. */
+  "autoCreateFolders": boolean
 }
 
 /** Preferences accessible in all the extension's commands */

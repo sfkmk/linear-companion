@@ -24,6 +24,15 @@ export async function createIssueFolder(parentDir: string, folderName: string): 
 }
 
 /**
+ * Builds a suggested folder name from an issue ID and title.
+ * Falls back to the issue ID if the title is empty.
+ */
+export function buildIssueFolderName(issueId: string, issueTitle: string, separator = " "): string {
+  const cleanTitle = issueTitle.trim();
+  return cleanTitle ? `${issueId}${separator}${cleanTitle}` : issueId;
+}
+
+/**
  * Validates if the new folder location is configured.
  * Returns the path if valid, null otherwise.
  */

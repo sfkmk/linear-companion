@@ -1,14 +1,25 @@
-import { showToast, Toast, closeMainWindow, getPreferenceValues, launchCommand, LaunchType } from "@raycast/api";
+import {
+  showToast,
+  Toast,
+  closeMainWindow,
+  getPreferenceValues,
+  launchCommand,
+  LaunchType,
+  openExtensionPreferences,
+} from "@raycast/api";
 import { getLinearWindowTitle, parseLinearTitle } from "./lib/linear";
 import { findIssueFolder, openFolderInFinder } from "./lib/finder";
+import { buildIssueFolderName, createIssueFolder, getNewFolderLocation } from "./lib/folder-creator";
 
 interface Preferences {
-  searchDirectory: string;
+  searchDirectory?: string;
+  autoCreateFolders?: boolean;
 }
 
 export default async function Command() {
   const preferences = getPreferenceValues<Preferences>();
-  const searchDir = preferences.searchDirectory;
+  const searchDir = preferences.searchDirectory || "~";
+  const autoCreateFolders = preferences.autoCreateFolders ?? false;
 
   try {
     // 1. Check if Linear is active/viewed
@@ -53,6 +64,37 @@ export default async function Command() {
         style: Toast.Style.Success,
         title: "Opened Folder",
         message: results[0],
+      });
+      await closeMainWindow();
+      return;
+    }
+
+    // Auto-create missing folder if enabled
+    if (results.length === 0 && autoCreateFolders) {
+      const newFolderLocation = getNewFolderLocation();
+
+      if (!newFolderLocation) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Configuration Required",
+          message: "Set 'New Folder Location' in preferences.",
+          primaryAction: {
+            title: "Open Preferences",
+            onAction: () => {
+              openExtensionPreferences();
+            },
+          },
+        });
+        return;
+      }
+
+      const folderName = buildIssueFolderName(issueId, issueTitle);
+      const newPath = await createIssueFolder(newFolderLocation, folderName);
+      await openFolderInFinder(newPath);
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Created Folder",
+        message: newPath,
       });
       await closeMainWindow();
       return;

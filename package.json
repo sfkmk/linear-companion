@@ -2,9 +2,9 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "linear-companion",
   "title": "Linear Companion",
-  "description": "Open local project folders based on the currently viewed Linear issue.",
+  "description": "Manage local project folders based on the currently viewed Linear issue.",
   "icon": "assets/icon.png",
-  "author": "sko",
+  "author": "sfkmk",
   "categories": [
     "Productivity",
     "Developer Tools"
@@ -27,6 +27,15 @@
       "title": "New Folder Location",
       "description": "Where new project folders should be created.",
       "label": "New Folders Root"
+    },
+    {
+      "name": "autoCreateFolders",
+      "type": "checkbox",
+      "required": false,
+      "title": "Auto-create Missing Folders",
+      "description": "Automatically create a folder when none is found for the current issue.",
+      "label": "Auto-create folders",
+      "default": false
     }
   ],
   "commands": [
