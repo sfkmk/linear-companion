@@ -3,7 +3,7 @@
   "name": "linear-companion",
   "title": "Linear Companion",
   "description": "Open local project folders based on the currently viewed Linear issue.",
-  "icon": "command-icon.png",
+  "icon": "assets/icon.png",
   "author": "sko",
   "categories": [
     "Productivity",
@@ -37,9 +37,9 @@
       "mode": "no-view"
     },
     {
-      "name": "resolve-issue",
-      "title": "Resolve Issue Folder",
-      "description": "Resolve ambiguity or create missing folders for an issue.",
+      "name": "query-issue-folder",
+      "title": "Query Issue Folder",
+      "description": "Find folders matching a Linear Issue ID.",
       "mode": "view",
       "arguments": [
         {
@@ -47,12 +47,6 @@
           "placeholder": "Issue ID",
           "type": "text",
           "required": true
-        },
-        {
-          "name": "issueTitle",
-          "placeholder": "Issue Title",
-          "type": "text",
-          "required": false
         }
       ]
     },

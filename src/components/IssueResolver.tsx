@@ -1,21 +1,31 @@
-import { Action, ActionPanel, List, Icon, showToast, Toast, openExtensionPreferences, closeMainWindow } from "@raycast/api";
+import { Action, ActionPanel, List, Icon, showToast, Toast, openExtensionPreferences, closeMainWindow, useNavigation } from "@raycast/api";
 import React, { useState } from "react";
 import { createIssueFolder, getNewFolderLocation } from "../lib/folder-creator";
 import { openFolderInFinder } from "../lib/finder";
+import { CreateFolderForm } from "./CreateFolderForm";
 
 interface IssueResolverProps {
   issueId: string;
   issueTitle: string;
   foundPaths: string[]; // Can be empty
+  isLoading?: boolean;
+  isManual?: boolean;
 }
 
-export function IssueResolver({ issueId, issueTitle, foundPaths }: IssueResolverProps) {
-  const [isLoading, setIsLoading] = useState(false);
+export function IssueResolver({ issueId, issueTitle, foundPaths, isLoading = false, isManual = false }: IssueResolverProps) {
+  const [isCreating, setIsCreating] = useState(false);
+  const { push } = useNavigation();
+  const displayTitle = issueTitle.trim() || issueId;
+  const proposedFolderName = `${issueId} ${issueTitle}`.trim() || issueId;
+
+  if (isLoading) {
+    return <List isLoading navigationTitle={`Searching: ${issueId}`} />;
+  }
 
   // 1. Case: Multiple Results
   if (foundPaths.length > 0) {
     return (
-      <List navigationTitle={`Resolve: ${issueId}`}>
+      <List navigationTitle={`Resolve: ${issueId}`} searchBarPlaceholder="Filter folders...">
         <List.Section title={`Found ${foundPaths.length} matches for ${issueId}`}>
           {foundPaths.map((path) => (
             <List.Item
@@ -43,27 +53,33 @@ export function IssueResolver({ issueId, issueTitle, foundPaths }: IssueResolver
   }
 
   // 2. Case: No Results -> Create Folder
-  const proposedFolderName = `${issueId} ${issueTitle}`.trim();
+  async function ensureNewFolderLocation(): Promise<string | null> {
+    const parentDir = getNewFolderLocation();
 
-  async function handleCreateFolder() {
-    setIsLoading(true);
-    try {
-      const parentDir = getNewFolderLocation();
-
-      if (!parentDir) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Configuration Required",
-          message: "Set 'New Folder Location' in preferences.",
-          primaryAction: {
-            title: "Open Preferences",
-            onAction: () => {
-              openExtensionPreferences();
-            },
+    if (!parentDir) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Configuration Required",
+        message: "Set 'New Folder Location' in preferences.",
+        primaryAction: {
+          title: "Open Preferences",
+          onAction: () => {
+            openExtensionPreferences();
           },
-        });
-        return;
-      }
+        },
+      });
+      return null;
+    }
+
+    return parentDir;
+  }
+
+  async function handleCreateDefaultFolder() {
+    if (isCreating) return;
+    setIsCreating(true);
+    try {
+      const parentDir = await ensureNewFolderLocation();
+      if (!parentDir) return;
 
       const newPath = await createIssueFolder(parentDir, proposedFolderName);
       await openFolderInFinder(newPath);
@@ -82,23 +98,51 @@ export function IssueResolver({ issueId, issueTitle, foundPaths }: IssueResolver
         message: String(error),
       });
     } finally {
-      setIsLoading(false);
+      setIsCreating(false);
     }
   }
+
+  async function handleCreateCustomFolder() {
+    const parentDir = await ensureNewFolderLocation();
+    if (!parentDir) return;
+
+    const defaultName = isManual ? `${issueId} ` : proposedFolderName;
+
+    push(
+      <CreateFolderForm
+        parentDir={parentDir}
+        initialName={defaultName}
+        navigationTitle={`Create: ${displayTitle}`}
+      />
+    );
+  }
+
+  const createDefaultAction = (
+    <Action
+      title="Create Suggested Folder"
+      icon={Icon.Plus}
+      onAction={handleCreateDefaultFolder}
+    />
+  );
+
+  const createCustomAction = (
+    <Action
+      title="Create Custom Folder"
+      icon={Icon.Pencil}
+      onAction={handleCreateCustomFolder}
+    />
+  );
 
   return (
     <List navigationTitle={`Create: ${issueId}`}>
       <List.EmptyView
         icon={Icon.Folder}
-        title={`No folder found for ${issueId}`}
-        description={`Create "${proposedFolderName}"?`}
+        title={`No folder found for ${displayTitle}`}
+        description={`Suggested name: "${proposedFolderName}"`}
         actions={
           <ActionPanel>
-            <Action
-              title="Create Folder"
-              icon={Icon.Plus}
-              onAction={handleCreateFolder}
-            />
+            {isManual ? createCustomAction : createDefaultAction}
+            {isManual ? createDefaultAction : createCustomAction}
             <Action
               title="Open Preferences"
               icon={Icon.Gear}

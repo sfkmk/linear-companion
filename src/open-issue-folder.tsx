@@ -59,16 +59,16 @@ export default async function Command() {
     }
 
     // Ambiguous or Missing Path: Launch UI
-    // We launch the 'resolve-issue' command passing the context.
+    // We launch the 'query-issue-folder' command passing the context.
     await launchCommand({
-      name: "resolve-issue",
+      name: "query-issue-folder",
       type: LaunchType.UserInitiated,
       arguments: {
         issueId,
-        issueTitle,
       },
       context: {
         foundPaths: results,
+        issueTitle,
       },
     });
 

@@ -6,7 +6,7 @@
 ## Core Features
 1.  **Open Issue Folder:** Extracts the Issue ID (e.g., `ENG-123`) from the Linear window title, searches for a matching folder in a user-defined directory, and opens it in Finder.
 2.  **Copy Issue ID:** A utility command to simply extract and copy the Issue ID to the clipboard.
-3.  **Resolve Issue Folder:** A UI-based workflow to handle cases where 0 or multiple folders are found, allowing users to create new project folders or select from matches.
+3.  **Query Issue Folder:** A UI-based workflow to handle cases where 0 or multiple folders are found, allowing users to create new project folders or select from matches.
 
 ## Architecture
 
@@ -19,7 +19,7 @@ The project follows a modular architecture to promote code reuse and scalability
   /components        # Reusable UI components
   /utils             # Generic helper functions
   open-issue-folder.tsx # Silent entry point for "Open Issue Folder"
-  resolve-issue.tsx     # UI entry point for handling ambiguity/creation
+  query-issue-folder.tsx # UI entry point for handling ambiguity/creation
   copy-issue-id.tsx     # Entry point for "Copy Issue ID"
 ```
 

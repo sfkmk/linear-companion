@@ -20,8 +20,8 @@ declare type Preferences = ExtensionPreferences
 declare namespace Preferences {
   /** Preferences accessible in the `open-issue-folder` command */
   export type OpenIssueFolder = ExtensionPreferences & {}
-  /** Preferences accessible in the `resolve-issue` command */
-  export type ResolveIssue = ExtensionPreferences & {}
+  /** Preferences accessible in the `query-issue-folder` command */
+  export type QueryIssueFolder = ExtensionPreferences & {}
   /** Preferences accessible in the `copy-issue-id` command */
   export type CopyIssueId = ExtensionPreferences & {}
 }
@@ -29,12 +29,10 @@ declare namespace Preferences {
 declare namespace Arguments {
   /** Arguments passed to the `open-issue-folder` command */
   export type OpenIssueFolder = {}
-  /** Arguments passed to the `resolve-issue` command */
-  export type ResolveIssue = {
+  /** Arguments passed to the `query-issue-folder` command */
+  export type QueryIssueFolder = {
   /** Issue ID */
-  "issueId": string,
-  /** Issue Title */
-  "issueTitle": string
+  "issueId": string
 }
   /** Arguments passed to the `copy-issue-id` command */
   export type CopyIssueId = {}
