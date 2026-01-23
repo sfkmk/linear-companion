@@ -1,15 +1,15 @@
-import { showToast, Toast, Clipboard } from "@raycast/api";
-import { getLinearWindowTitle, extractIssueId } from "./lib/linear";
+import { showToast, Toast, Clipboard } from '@raycast/api';
+import { getLinearWindowTitle, extractIssueId } from './lib/linear';
 
 export default async function Command() {
   try {
     const title = await getLinearWindowTitle();
-    
+
     if (!title) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "Linear not found",
-        message: "Is the app running and open?",
+        title: 'Linear not found',
+        message: 'Is the app running and open?',
       });
       return;
     }
@@ -18,7 +18,7 @@ export default async function Command() {
     if (!issueId) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "No Issue ID found",
+        title: 'No Issue ID found',
         message: `Current title: "${title}"`,
       });
       return;
@@ -27,14 +27,13 @@ export default async function Command() {
     await Clipboard.copy(issueId);
     await showToast({
       style: Toast.Style.Success,
-      title: "Copied to Clipboard",
+      title: 'Copied to Clipboard',
       message: issueId,
     });
-
   } catch (error) {
     await showToast({
       style: Toast.Style.Failure,
-      title: "Failed to copy",
+      title: 'Failed to copy',
       message: String(error),
     });
   }

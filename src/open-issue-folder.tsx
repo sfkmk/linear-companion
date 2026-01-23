@@ -6,10 +6,10 @@ import {
   launchCommand,
   LaunchType,
   openExtensionPreferences,
-} from "@raycast/api";
-import { getLinearWindowTitle, parseLinearTitle } from "./lib/linear";
-import { findIssueFolder, openFolderInFinder } from "./lib/finder";
-import { buildIssueFolderName, createIssueFolder, getNewFolderLocation } from "./lib/folder-creator";
+} from '@raycast/api';
+import { getLinearWindowTitle, parseLinearTitle } from './lib/linear';
+import { findIssueFolder, openFolderInFinder } from './lib/finder';
+import { buildIssueFolderName, createIssueFolder, getNewFolderLocation } from './lib/folder-creator';
 
 interface Preferences {
   searchDirectory?: string;
@@ -18,18 +18,18 @@ interface Preferences {
 
 export default async function Command() {
   const preferences = getPreferenceValues<Preferences>();
-  const searchDir = preferences.searchDirectory || "~";
+  const searchDir = preferences.searchDirectory || '~';
   const autoCreateFolders = preferences.autoCreateFolders ?? false;
 
   try {
     // 1. Check if Linear is active/viewed
     const title = await getLinearWindowTitle();
-    
+
     if (!title) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "Linear not found",
-        message: "Is the app running and open?",
+        title: 'Linear not found',
+        message: 'Is the app running and open?',
       });
       return;
     }
@@ -39,7 +39,7 @@ export default async function Command() {
     if (!parsed) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "No Issue ID found",
+        title: 'No Issue ID found',
         message: `Current title: "${title}"`,
       });
       return;
@@ -62,7 +62,7 @@ export default async function Command() {
       await openFolderInFinder(results[0]);
       await showToast({
         style: Toast.Style.Success,
-        title: "Opened Folder",
+        title: 'Opened Folder',
         message: results[0],
       });
       await closeMainWindow();
@@ -76,10 +76,10 @@ export default async function Command() {
       if (!newFolderLocation) {
         await showToast({
           style: Toast.Style.Failure,
-          title: "Configuration Required",
+          title: 'Configuration Required',
           message: "Set 'New Folder Location' in preferences.",
           primaryAction: {
-            title: "Open Preferences",
+            title: 'Open Preferences',
             onAction: () => {
               openExtensionPreferences();
             },
@@ -93,7 +93,7 @@ export default async function Command() {
       await openFolderInFinder(newPath);
       await showToast({
         style: Toast.Style.Success,
-        title: "Created Folder",
+        title: 'Created Folder',
         message: newPath,
       });
       await closeMainWindow();
@@ -103,7 +103,7 @@ export default async function Command() {
     // Ambiguous or Missing Path: Launch UI
     // We launch the 'query-issue-folder' command passing the context.
     await launchCommand({
-      name: "query-issue-folder",
+      name: 'query-issue-folder',
       type: LaunchType.UserInitiated,
       arguments: {
         issueId,
@@ -113,12 +113,11 @@ export default async function Command() {
         issueTitle,
       },
     });
-
   } catch (error) {
     await showToast({
       style: Toast.Style.Failure,
-      title: "Something went wrong",
-      message: error instanceof Error ? error.message : "Unknown error",
+      title: 'Something went wrong',
+      message: error instanceof Error ? error.message : 'Unknown error',
     });
   }
 }

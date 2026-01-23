@@ -1,7 +1,7 @@
-import { Action, ActionPanel, Form, showToast, Toast, closeMainWindow } from "@raycast/api";
-import React, { useState } from "react";
-import { createIssueFolder } from "../lib/folder-creator";
-import { openFolderInFinder } from "../lib/finder";
+import { Action, ActionPanel, Form, showToast, Toast, closeMainWindow } from '@raycast/api';
+import React, { useState } from 'react';
+import { createIssueFolder } from '../lib/folder-creator';
+import { openFolderInFinder } from '../lib/finder';
 
 interface CreateFolderFormProps {
   parentDir: string;
@@ -13,7 +13,7 @@ interface CreateFolderFormProps {
 export function CreateFolderForm({ parentDir, issueId, initialName, navigationTitle }: CreateFolderFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [name, setName] = useState(initialName);
-  const [separator, setSeparator] = useState(" ");
+  const [separator, setSeparator] = useState(' ');
 
   const trimmedName = name.trim();
   const preview = trimmedName ? `${issueId}${separator}${trimmedName}` : issueId;
@@ -22,8 +22,8 @@ export function CreateFolderForm({ parentDir, issueId, initialName, navigationTi
     if (!trimmedName) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "Folder name required",
-        message: "Enter a name to create the folder.",
+        title: 'Folder name required',
+        message: 'Enter a name to create the folder.',
       });
       return;
     }
@@ -35,15 +35,15 @@ export function CreateFolderForm({ parentDir, issueId, initialName, navigationTi
       await openFolderInFinder(newPath);
       await showToast({
         style: Toast.Style.Success,
-        title: "Created Folder",
+        title: 'Created Folder',
         message: newPath,
       });
       await closeMainWindow();
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "Failed to create folder",
-        message: error instanceof Error ? error.message : "Unknown error",
+        title: 'Failed to create folder',
+        message: error instanceof Error ? error.message : 'Unknown error',
       });
     } finally {
       setIsLoading(false);

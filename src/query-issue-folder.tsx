@@ -1,8 +1,8 @@
-import { LaunchProps, getPreferenceValues, showToast, Toast } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
-import React, { useEffect } from "react";
-import { IssueResolver } from "./components/IssueResolver";
-import { findIssueFolder } from "./lib/finder";
+import { LaunchProps, getPreferenceValues, showToast, Toast } from '@raycast/api';
+import { usePromise } from '@raycast/utils';
+import React, { useEffect } from 'react';
+import { IssueResolver } from './components/IssueResolver';
+import { findIssueFolder } from './lib/finder';
 
 interface ResolverArguments {
   issueId: string;
@@ -17,13 +17,18 @@ interface Preferences {
   searchDirectory?: string;
 }
 
-export default function Command(props: LaunchProps<{ arguments: ResolverArguments; launchContext?: ResolverContext }>) {
+export default function Command(
+  props: LaunchProps<{
+    arguments: ResolverArguments;
+    launchContext?: ResolverContext;
+  }>
+) {
   const { issueId } = props.arguments;
   const normalizedId = issueId.trim().toUpperCase();
-  const issueTitle = props.launchContext?.issueTitle ?? "";
+  const issueTitle = props.launchContext?.issueTitle ?? '';
   const hasContextResults = Array.isArray(props.launchContext?.foundPaths);
   const preferences = getPreferenceValues<Preferences>();
-  const searchDir = preferences.searchDirectory || "~";
+  const searchDir = preferences.searchDirectory || '~';
 
   const { data, isLoading, error } = usePromise(
     async (id: string, rootDir: string, hasContext: boolean) => {
@@ -44,8 +49,8 @@ export default function Command(props: LaunchProps<{ arguments: ResolverArgument
     if (!normalizedId) {
       showToast({
         style: Toast.Style.Failure,
-        title: "Issue ID required",
-        message: "Enter a valid Linear Issue ID.",
+        title: 'Issue ID required',
+        message: 'Enter a valid Linear Issue ID.',
       });
       return;
     }
@@ -53,8 +58,8 @@ export default function Command(props: LaunchProps<{ arguments: ResolverArgument
     if (error) {
       showToast({
         style: Toast.Style.Failure,
-        title: "Search failed",
-        message: error instanceof Error ? error.message : "Unknown error",
+        title: 'Search failed',
+        message: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   }, [normalizedId, error]);

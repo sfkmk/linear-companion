@@ -3,7 +3,7 @@
   "name": "linear-companion",
   "title": "Linear Companion",
   "description": "Manage local project folders based on the currently viewed Linear issue.",
-  "icon": "assets/icon.png",
+  "icon": "icon-mid.png",
   "author": "sfkmk",
   "categories": [
     "Productivity",
@@ -72,8 +72,10 @@
     "react": "^19.2.3"
   },
   "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
     "@types/node": "^25.0.10",
     "@types/react": "^19.2.9",
+    "eslint": "^9.39.2",
     "prettier": "^3.8.1",
     "typescript": "^5.9.3"
   },

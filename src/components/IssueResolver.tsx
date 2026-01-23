@@ -1,8 +1,18 @@
-import { Action, ActionPanel, List, Icon, showToast, Toast, openExtensionPreferences, closeMainWindow, useNavigation } from "@raycast/api";
-import React, { useState } from "react";
-import { buildIssueFolderName, createIssueFolder, getNewFolderLocation } from "../lib/folder-creator";
-import { openFolderInFinder } from "../lib/finder";
-import { CreateFolderForm } from "./CreateFolderForm";
+import {
+  Action,
+  ActionPanel,
+  List,
+  Icon,
+  showToast,
+  Toast,
+  openExtensionPreferences,
+  closeMainWindow,
+  useNavigation,
+} from '@raycast/api';
+import React, { useState } from 'react';
+import { buildIssueFolderName, createIssueFolder, getNewFolderLocation } from '../lib/folder-creator';
+import { openFolderInFinder } from '../lib/finder';
+import { CreateFolderForm } from './CreateFolderForm';
 
 interface IssueResolverProps {
   issueId: string;
@@ -12,7 +22,13 @@ interface IssueResolverProps {
   isManual?: boolean;
 }
 
-export function IssueResolver({ issueId, issueTitle, foundPaths, isLoading = false, isManual = false }: IssueResolverProps) {
+export function IssueResolver({
+  issueId,
+  issueTitle,
+  foundPaths,
+  isLoading = false,
+  isManual = false,
+}: IssueResolverProps) {
   const [isCreating, setIsCreating] = useState(false);
   const { push } = useNavigation();
   const displayTitle = issueTitle.trim() || issueId;
@@ -30,7 +46,7 @@ export function IssueResolver({ issueId, issueTitle, foundPaths, isLoading = fal
           {foundPaths.map((path) => (
             <List.Item
               key={path}
-              title={path.split("/").pop() || path}
+              title={path.split('/').pop() || path}
               subtitle={path}
               icon={Icon.Folder}
               actions={
@@ -59,10 +75,10 @@ export function IssueResolver({ issueId, issueTitle, foundPaths, isLoading = fal
     if (!parentDir) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "Configuration Required",
+        title: 'Configuration Required',
         message: "Set 'New Folder Location' in preferences.",
         primaryAction: {
-          title: "Open Preferences",
+          title: 'Open Preferences',
           onAction: () => {
             openExtensionPreferences();
           },
@@ -83,18 +99,17 @@ export function IssueResolver({ issueId, issueTitle, foundPaths, isLoading = fal
 
       const newPath = await createIssueFolder(parentDir, suggestedName);
       await openFolderInFinder(newPath);
-      
+
       await showToast({
         style: Toast.Style.Success,
-        title: "Created Folder",
+        title: 'Created Folder',
         message: newPath,
       });
       await closeMainWindow();
-
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "Failed to create folder",
+        title: 'Failed to create folder',
         message: String(error),
       });
     } finally {
@@ -119,19 +134,11 @@ export function IssueResolver({ issueId, issueTitle, foundPaths, isLoading = fal
   }
 
   const createDefaultAction = (
-    <Action
-      title="Create Suggested Folder"
-      icon={Icon.Plus}
-      onAction={handleCreateDefaultFolder}
-    />
+    <Action title="Create Suggested Folder" icon={Icon.Plus} onAction={handleCreateDefaultFolder} />
   );
 
   const createCustomAction = (
-    <Action
-      title="Create Custom Folder"
-      icon={Icon.Pencil}
-      onAction={handleCreateCustomFolder}
-    />
+    <Action title="Create Custom Folder" icon={Icon.Pencil} onAction={handleCreateCustomFolder} />
   );
 
   return (
@@ -144,11 +151,7 @@ export function IssueResolver({ issueId, issueTitle, foundPaths, isLoading = fal
           <ActionPanel>
             {isManual ? createCustomAction : createDefaultAction}
             {isManual ? createDefaultAction : createCustomAction}
-            <Action
-              title="Open Preferences"
-              icon={Icon.Gear}
-              onAction={openExtensionPreferences}
-            />
+            <Action title="Open Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
           </ActionPanel>
         }
       />
