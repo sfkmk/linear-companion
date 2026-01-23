@@ -1,6 +1,6 @@
 import { showToast, Toast, closeMainWindow, getPreferenceValues } from "@raycast/api";
-import { getLinearWindowTitle, extractIssueId } from "../services/linear";
-import { findIssueFolder, openFolderInFinder } from "../services/finder";
+import { getLinearWindowTitle, extractIssueId } from "./services/linear";
+import { findIssueFolder, openFolderInFinder } from "./services/finder";
 
 interface Preferences {
   searchDirectory: string;
