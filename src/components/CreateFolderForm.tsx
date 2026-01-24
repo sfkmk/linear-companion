@@ -29,7 +29,7 @@ export function CreateFolderForm({ parentDir, issueId, initialName, navigationTi
   const allowEmojis = preferences.allowEmojis ?? false;
   const sanitizeName = (value: string) => (allowEmojis ? value : removeEmojisPreserveSpaces(value));
   const [isLoading, setIsLoading] = useState(false);
-  const [name, setName] = useState(() => sanitizeName(initialName));
+  const [name, setName] = useState(() => sanitizeName(initialName).trimStart());
   const [separator, setSeparator] = useState(' ');
 
   const trimmedName = name.trim();
