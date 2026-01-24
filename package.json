@@ -3,7 +3,7 @@
   "name": "linear-companion",
   "title": "Linear Companion",
   "description": "Manage local project folders based on the currently viewed Linear issue.",
-  "icon": "icon-mid.png",
+  "icon": "icon.png",
   "author": "sfkmk",
   "categories": [
     "Productivity",
@@ -29,12 +29,12 @@
       "label": "New Folders Root"
     },
     {
-      "name": "autoCreateFolders",
+      "name": "allowEmojis",
       "type": "checkbox",
       "required": false,
-      "title": "Auto-create Missing Folders",
-      "description": "Automatically create a folder when none is found for the current issue.",
-      "label": "Auto-create folders",
+      "title": "Folder Naming",
+      "label": "Allow Emojis",
+      "description": "Allow emojis in folder names. If unchecked, they will be removed.",
       "default": false
     }
   ],
@@ -43,7 +43,18 @@
       "name": "open-issue-folder",
       "title": "Open Issue Folder",
       "description": "Opens the local folder corresponding to the current Linear issue.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "autoCreateFolders",
+          "type": "checkbox",
+          "required": false,
+          "title": "Auto-create Missing Folders",
+          "description": "Automatically create a folder inside your 'New Folder Location' if none is found for the current issue.",
+          "label": "Auto-create folders",
+          "default": false
+        }
+      ]
     },
     {
       "name": "query-issue-folder",

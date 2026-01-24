@@ -12,8 +12,8 @@ type ExtensionPreferences = {
   "searchDirectory": string,
   /** New Folder Location - Where new project folders should be created. */
   "newFolderLocation"?: string,
-  /** Auto-create Missing Folders - Automatically create a folder when none is found for the current issue. */
-  "autoCreateFolders": boolean
+  /** Folder Naming - Allow emojis in folder names. If unchecked, they will be removed. */
+  "allowEmojis": boolean
 }
 
 /** Preferences accessible in all the extension's commands */
@@ -21,7 +21,10 @@ declare type Preferences = ExtensionPreferences
 
 declare namespace Preferences {
   /** Preferences accessible in the `open-issue-folder` command */
-  export type OpenIssueFolder = ExtensionPreferences & {}
+  export type OpenIssueFolder = ExtensionPreferences & {
+  /** Auto-create Missing Folders - Automatically create a folder inside your 'New Folder Location' if none is found for the current issue. */
+  "autoCreateFolders": boolean
+}
   /** Preferences accessible in the `query-issue-folder` command */
   export type QueryIssueFolder = ExtensionPreferences & {}
   /** Preferences accessible in the `copy-issue-id` command */

@@ -1,7 +1,17 @@
-import { Action, ActionPanel, Form, showToast, Toast, closeMainWindow } from '@raycast/api';
+import {
+  Action,
+  ActionPanel,
+  Form,
+  showToast,
+  Toast,
+  closeMainWindow,
+  getPreferenceValues,
+  PopToRootType,
+} from '@raycast/api';
 import React, { useState } from 'react';
 import { createIssueFolder } from '../lib/folder-creator';
 import { openFolderInFinder } from '../lib/finder';
+import { removeEmojisPreserveSpaces } from '../utils/text-utils';
 
 interface CreateFolderFormProps {
   parentDir: string;
@@ -10,13 +20,24 @@ interface CreateFolderFormProps {
   navigationTitle: string;
 }
 
+interface Preferences {
+  allowEmojis?: boolean;
+}
+
 export function CreateFolderForm({ parentDir, issueId, initialName, navigationTitle }: CreateFolderFormProps) {
+  const preferences = getPreferenceValues<Preferences>();
+  const allowEmojis = preferences.allowEmojis ?? false;
+  const sanitizeName = (value: string) => (allowEmojis ? value : removeEmojisPreserveSpaces(value));
   const [isLoading, setIsLoading] = useState(false);
-  const [name, setName] = useState(initialName);
+  const [name, setName] = useState(() => sanitizeName(initialName));
   const [separator, setSeparator] = useState(' ');
 
   const trimmedName = name.trim();
   const preview = trimmedName ? `${issueId}${separator}${trimmedName}` : issueId;
+
+  const handleNameChange = (value: string) => {
+    setName(sanitizeName(value));
+  };
 
   async function handleSubmit() {
     if (!trimmedName) {
@@ -38,7 +59,7 @@ export function CreateFolderForm({ parentDir, issueId, initialName, navigationTi
         title: 'Created Folder',
         message: newPath,
       });
-      await closeMainWindow();
+      await closeMainWindow({ popToRootType: PopToRootType.Immediate });
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
@@ -60,20 +81,20 @@ export function CreateFolderForm({ parentDir, issueId, initialName, navigationTi
       }
       isLoading={isLoading}
     >
-      <Form.Description title="Issue ID" text={issueId} />
+      <Form.Description title="Preview" text={preview} />
+      <Form.TextField
+        id="folderName"
+        title="Name"
+        value={name}
+        onChange={handleNameChange}
+        placeholder="Enter folder name"
+        autoFocus
+      />
       <Form.Dropdown id="separator" title="Separator" value={separator} onChange={setSeparator}>
         <Form.Dropdown.Item value=" " title="Space" />
         <Form.Dropdown.Item value="-" title="Hyphen" />
         <Form.Dropdown.Item value="." title="Period" />
       </Form.Dropdown>
-      <Form.TextField
-        id="folderName"
-        title={preview}
-        value={name}
-        onChange={setName}
-        placeholder="Enter folder name"
-        autoFocus
-      />
     </Form>
   );
 }

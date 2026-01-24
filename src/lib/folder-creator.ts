@@ -1,3 +1,11 @@
+import { getPreferenceValues } from '@raycast/api';
+import { removeEmojis } from '../utils/text-utils';
+
+interface Preferences {
+  newFolderLocation?: string;
+  allowEmojis?: boolean;
+}
+
 /**
  * Creates a folder at the specified location and opens it.
  * @param parentDir The directory where the new folder will live.
@@ -13,7 +21,24 @@ export async function createIssueFolder(parentDir: string, folderName: string): 
   const fs = await import('fs/promises');
   const path = await import('path');
 
-  const fullPath = path.join(parentDir, folderName);
+  const normalizedName = folderName.trim();
+  const fullPath = path.join(parentDir, normalizedName);
+
+  let exists = false;
+
+  try {
+    await fs.stat(fullPath);
+    exists = true;
+  } catch (error) {
+    const errno = (error as NodeJS.ErrnoException).code;
+    if (errno !== 'ENOENT') {
+      throw error;
+    }
+  }
+
+  if (exists) {
+    throw new Error('Folder already exists');
+  }
 
   // Create recursively just in case
   await fs.mkdir(fullPath, { recursive: true });
@@ -27,16 +52,17 @@ export async function createIssueFolder(parentDir: string, folderName: string): 
  */
 export function buildIssueFolderName(issueId: string, issueTitle: string, separator = ' '): string {
   const cleanTitle = issueTitle.trim();
-  return cleanTitle ? `${issueId}${separator}${cleanTitle}` : issueId;
+  const preferences = getPreferenceValues<Preferences>();
+  const allowEmojis = preferences.allowEmojis ?? false;
+  const finalTitle = allowEmojis ? cleanTitle : removeEmojis(cleanTitle);
+  return finalTitle ? `${issueId}${separator}${finalTitle}` : issueId;
 }
 
 /**
  * Validates if the new folder location is configured.
  * Returns the path if valid, null otherwise.
  */
-import { getPreferenceValues } from '@raycast/api';
-
 export function getNewFolderLocation(): string | null {
-  const prefs = getPreferenceValues<{ newFolderLocation?: string }>();
+  const prefs = getPreferenceValues<Preferences>();
   return prefs.newFolderLocation || null;
 }
