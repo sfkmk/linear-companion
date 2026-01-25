@@ -20,6 +20,8 @@ You can configure the following settings in Raycast:
 - **New Folders Location**: The specific location where new project folders will be created.
 - **Allow Emojis**: Option to allow emojis in folder names. By default, they will be removed.
 
-## Disclaimer
+---
+
+#### Disclaimer
 
 This is an unofficial community project and is not affiliated with, endorsed by, or connected to Linear Orbit, Inc. "Linear" and the Linear logo are trademarks of Linear Orbit, Inc.
