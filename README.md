@@ -19,3 +19,7 @@ You can configure the following settings in Raycast:
 - **Search Directory**: The root directory where the extension searches for project folders (defaults to users home folder).
 - **New Folders Location**: The specific location where new project folders will be created.
 - **Allow Emojis**: Option to allow emojis in folder names. By default, they will be removed.
+
+## Disclaimer
+
+This is an unofficial community project and is not affiliated with, endorsed by, or connected to Linear Orbit, Inc. "Linear" and the Linear logo are trademarks of Linear Orbit, Inc.
