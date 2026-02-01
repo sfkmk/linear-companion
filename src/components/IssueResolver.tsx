@@ -10,8 +10,10 @@ import {
   useNavigation,
 } from '@raycast/api';
 import React, { useState } from 'react';
-import { buildIssueFolderName, createIssueFolder, getNewFolderLocation } from '../lib/folder-creator';
+
 import { openFolderInFinder } from '../lib/finder';
+import { buildIssueFolderName, createIssueFolder, getNewFolderLocation } from '../lib/folder-creator';
+
 import { CreateFolderForm } from './CreateFolderForm';
 
 interface IssueResolverProps {
