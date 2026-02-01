@@ -1,4 +1,5 @@
 import { getPreferenceValues } from '@raycast/api';
+
 import { removeEmojis } from '../utils/text-utils';
 
 interface Preferences {

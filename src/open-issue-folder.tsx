@@ -7,9 +7,10 @@ import {
   LaunchType,
   openExtensionPreferences,
 } from '@raycast/api';
-import { getLinearWindowTitle, parseLinearTitle } from './lib/linear';
+
 import { findIssueFolder, openFolderInFinder } from './lib/finder';
 import { buildIssueFolderName, createIssueFolder, getNewFolderLocation } from './lib/folder-creator';
+import { getLinearWindowTitle, parseLinearTitle } from './lib/linear';
 
 interface Preferences {
   searchDirectory?: string;

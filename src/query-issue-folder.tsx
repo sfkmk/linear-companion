@@ -1,6 +1,7 @@
 import { LaunchProps, getPreferenceValues, showToast, Toast } from '@raycast/api';
 import { usePromise } from '@raycast/utils';
 import React, { useEffect } from 'react';
+
 import { IssueResolver } from './components/IssueResolver';
 import { findIssueFolder } from './lib/finder';
 
