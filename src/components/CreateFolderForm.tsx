@@ -9,8 +9,9 @@ import {
   PopToRootType,
 } from '@raycast/api';
 import React, { useState } from 'react';
-import { createIssueFolder } from '../lib/folder-creator';
+
 import { openFolderInFinder } from '../lib/finder';
+import { createIssueFolder } from '../lib/folder-creator';
 import { removeEmojisPreserveSpaces } from '../utils/text-utils';
 
 interface CreateFolderFormProps {
