@@ -2,9 +2,10 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "linear-companion",
   "title": "Linear Companion",
-  "description": "Manage local project folders based on the currently viewed Linear issue.",
+  "description": "Integrate LifeOS workflows directly into Linear to streamline life management and boost productivity.",
   "icon": "icon.png",
   "author": "sfkmk",
+  "owner": "inmind",
   "categories": [
     "Productivity",
     "Developer Tools"
@@ -87,6 +88,7 @@
     "@types/node": "^25.0.10",
     "@types/react": "^19.2.9",
     "eslint": "^9.39.2",
+    "eslint-plugin-import": "^2.32.0",
     "prettier": "^3.8.1",
     "typescript": "^5.9.3"
   },
@@ -95,6 +97,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the `prepublishOnly` script and rerun `npm publish` again.\\nIf you wanted to publish it to the Raycast Store instead, use `npm run publish` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   },
   "platforms": [
