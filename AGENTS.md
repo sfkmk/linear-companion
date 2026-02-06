@@ -1,64 +1,135 @@
-# Linear Companion - Raycast Extension Agent Guide
+# AGENTS.md
 
-## Project Overview
-**Linear Companion** is a Raycast extension designed to bridge the gap between the Linear desktop app (macOS) and the local filesystem. Its primary function is to read the currently active Linear issue and instantly open the corresponding local project folder.
+## Purpose
 
-## Core Features
-1.  **Open Issue Folder:** Extracts the Issue ID (e.g., `ENG-123`) from the Linear window title, searches for a matching folder in a user-defined directory, and opens it in Finder.
-2.  **Copy Issue ID:** A utility command to simply extract and copy the Issue ID to the clipboard.
-3.  **Query Issue Folder:** A UI-based workflow to handle cases where 0 or multiple folders are found, allowing users to create new project folders or select from matches.
+- This file is the repo contract for humans + coding agents.
+- Keep it current when scripts, lint rules, commands, preferences, or architecture change.
 
-## Architecture
+## Project Snapshot
 
-The project follows a modular architecture to promote code reuse and scalability.
+- Raycast extension (macOS) that maps the active Linear issue -> local folder.
+- Commands:
+  - `open-issue-folder` (no-view): happy path opens folder; launches UI only when needed.
+  - `query-issue-folder` (view): resolve 0/many matches; can create a folder.
+  - `copy-issue-id` (no-view): copies issue ID from the active Linear window title.
 
-### Directory Structure
-```
-/src
-  /lib               # Domain-specific business logic (e.g., Linear, Filesystem) - NOT 'services'
-  /components        # Reusable UI components
-  /utils             # Generic helper functions
-  open-issue-folder.tsx # Silent entry point for "Open Issue Folder"
-  query-issue-folder.tsx # UI entry point for handling ambiguity/creation
-  copy-issue-id.tsx     # Entry point for "Copy Issue ID"
-```
+## Local Commands (Build / Lint / Dev)
 
-### Key Components
+- Install: `npm ci` (preferred; repo has `package-lock.json`) or `npm install`
+- Dev (Raycast): `npm run dev` (runs `ray develop`)
+- Build: `npm run build` (runs `ray build -e dist`, output in `dist/`)
+- Lint: `npm run lint` (runs `ray lint`)
+- Fix lint: `npm run fix-lint` (runs `ray lint --fix`)
+- Typecheck: `npx tsc --noEmit`
+- Format check: `npx prettier . --check`
+- Format write: `npx prettier . --write`
+- Publish (Raycast Store): `npm run publish`
+- Do not: `npm publish` (blocked by `prepublishOnly`)
 
-#### `src/lib/linear.ts`
-*   **Purpose:** Interface with the Linear macOS application.
-*   **Mechanism:** Uses AppleScript (System Events) to fetch the title of the frontmost window of process "Linear".
+## Tests (Current + How To Run One Test)
 
-#### `src/lib/finder.ts`
-*   **Purpose:** File system search (`mdfind`) and Finder automation.
-*   **Query:** Prefix match `kMDItemFSName == "{issueId}*"` to support folders named like "ENG-123 Feature Title".
+- Current state:
+  - No automated test runner configured (no `test` script; no jest/vitest config; no `*.test.*` files).
+- Manual smoke testing (recommended today):
+  - Run `npm run dev`
+  - Trigger each Raycast command and verify: toasts, empty states, Finder opening, folder creation.
+- If you add unit tests, prefer Vitest (fast TS support, good DX):
+  - Run all: `npx vitest run`
+  - Run one file: `npx vitest run path/to/foo.test.ts`
+  - Run one test by name: `npx vitest run -t "test name"`
+  - Watch mode: `npx vitest`
+- Keep tests pure (no AppleScript/Finder calls) unless explicitly writing integration tests.
 
-#### `src/lib/folder-creator.ts`
-*   **Purpose:** Logic for creating standardized project folders.
-*   **Note:** Designed to be reused by any future command (e.g., "Create New Issue") that needs to generate a folder structure.
+## Repo Layout (Follow This)
 
-### Architectural Guidelines (Strict)
+- Command entrypoints: `src/*.tsx` and must match `package.json#commands[].name`.
+- UI components: `src/components/` (PascalCase filenames).
+- Domain logic: `src/lib/` (no UI; reusable; can use Node APIs).
+- Generic helpers: `src/utils/` (pure utilities).
+- Docs: `resources/` contains Raycast best-practice notes.
 
-1.  **Modular Logic (`src/lib`):**
-    *   Place all business logic in `src/lib`.
-    *   **Do not** hardcode logic like "Create Folder" into a specific command's UI. It must be a reusable function in `src/lib`.
-    *   **Reasoning:** Features like "folder creation" are core capabilities that different entry points (commands) might need. Keeping them separate ensures consistency across the extension.
+## Generated / Do-Not-Edit Files
 
-2.  **Reusable Components (`src/components`):**
-    *   Complex UI workflows (like "deciding what to do with an Issue ID") should be encapsulated in components (e.g., `<IssueResolver />`).
-    *   **Reasoning:** If we add a "Create Issue" command later, it can reuse `<IssueResolver />` to handle the folder aspect without duplicating UI code.
+- `raycast-env.d.ts` is auto-generated from `package.json` (manifest).
+- Do not edit `raycast-env.d.ts` manually; update `package.json` and re-run dev/build.
 
-3.  **Sub-Agents & Task Management:**
-    *   **Rule:** Agents acting as project leads must use sub-agents for research, documentation lookup, or parallelizable tasks.
-    *   **Rule:** Use `todowrite` extensively to track progress.
-    *   **Reasoning:** This keeps the main agent's context focused on decision-making and implementation details while offloading routine information gathering.
+## Raycast Runtime Constraints (Hard Rules)
 
-## Development Workflow
-*   **Build:** `npm run build`
-*   **Dev Loop:** `npm run dev`
-*   **Lint:** `npm run lint`
+- Not a browser:
+  - Do not use `window`, `document`, `navigator`, DOM elements, CSS files, or client routers.
+- Use Raycast primitives:
+  - `List`, `Form`, `ActionPanel`, `Detail`, `showToast`, `Clipboard`, `LocalStorage`, `Cache`, etc.
+- Performance:
+  - Never block render with synchronous work; use async APIs + `isLoading`.
 
-## Best Practices
-*   **UI/UX:** Silent by default (`no-view`). Only show UI (`view`) when user decision is required (0 or >1 results).
-*   **Two-Command Pattern:** Use `launchCommand` to switch from a silent background command to an interactive UI command when needed.
-*   **Preferences:** Use standard Raycast preferences for configuration (e.g., `searchDirectory`, `newFolderLocation`). If a required preference is missing, prompt the user with a Toast to open Settings via `openExtensionPreferences()`.
+## Formatting (Enforced)
+
+- Prettier config (`.prettierrc`):
+  - Semicolons: on (`semi: true`)
+  - Quotes: single (`singleQuote: true`)
+  - Line length: `printWidth: 120`
+  - Indent: 2 spaces
+  - Trailing commas: `es5`
+
+## Imports (Enforced)
+
+- ESLint `import/order` (see `eslint.config.js`):
+  - Import statements are alphabetized.
+  - Blank lines between import groups (`newlines-between: always`).
+- Conventions:
+  - Group order: Node builtins -> external packages -> internal relative imports.
+  - Avoid unused imports; keep import lists tight.
+
+## TypeScript (Repo Defaults)
+
+- `strict: true` (see `tsconfig.json`); avoid `any`.
+- Treat caught errors as `unknown` and narrow:
+  - Prefer `error instanceof Error ? error.message : String(error)`
+- Prefer the auto-generated Raycast types when possible:
+  - `Preferences.*` and `Arguments.*` live in `raycast-env.d.ts`.
+  - If you define a local preference type, name it `CommandPreferences` (avoid confusion with global `Preferences`).
+
+## Naming Conventions
+
+- Components: `PascalCase` (e.g., `IssueResolver`)
+- Functions/vars: `camelCase` (e.g., `findIssueFolder`)
+- Files:
+  - Commands: kebab-case matching command name (e.g., `src/open-issue-folder.tsx`)
+  - Lib/utils: kebab-case for multi-word modules (e.g., `folder-creator.ts`, `text-utils.ts`)
+- Exports:
+  - Command entrypoints: `export default function Command()` (async for no-view commands).
+  - Shared logic: named exports from `src/lib/*`.
+
+## UI / UX Rules
+
+- Every interactive List item must have an `ActionPanel`.
+- Primary action first; use standard shortcuts when adding refresh:
+  - Refresh: Cmd+R
+- Always provide:
+  - Loading states (`isLoading`)
+  - Empty states (`List.EmptyView`) with a clear next action
+  - Error states via toasts (not console spam)
+
+## Error Handling & User Messaging
+
+- Use `showToast` for failures; keep messages actionable and short.
+- Missing required preferences:
+  - Show a failure toast with a primary action that calls `openExtensionPreferences()`.
+- Never toast or log secrets; redact sensitive values.
+
+## Platform Integration (macOS-specific)
+
+- Linear:
+  - Read active window title via AppleScript (`@raycast/utils` `runAppleScript`).
+  - If Linear is not running / no window: return `null` and show a friendly toast.
+- Filesystem + Finder:
+  - Search uses Spotlight `mdfind` with a prefix match on folder name.
+  - Avoid shell injection; prefer argument arrays (e.g., `execFile`) if touching command execution.
+  - Use async filesystem APIs (`fs/promises`).
+
+## Agent/Editor Rules
+
+- No Cursor rules found in `.cursor/rules/` or `.cursorrules`.
+- No Copilot instructions found in `.github/copilot-instructions.md`.
+- When making changes:
+  - Search the codebase first, keep edits minimal, and run `npm run lint` + `npm run build`.
