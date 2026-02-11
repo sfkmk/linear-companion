@@ -8,6 +8,8 @@ import {
   openExtensionPreferences,
 } from '@raycast/api';
 
+import { handleBacklinkResult } from './lib/backlink-utils';
+import { ensureBacklink } from './lib/backlinker';
 import { findIssueFolder, openFolderInFinder } from './lib/finder';
 import { buildIssueFolderName, createIssueFolder, getNewFolderLocation } from './lib/folder-creator';
 import { getLinearWindowTitle, parseLinearTitle } from './lib/linear';
@@ -15,12 +17,16 @@ import { getLinearWindowTitle, parseLinearTitle } from './lib/linear';
 interface Preferences {
   searchDirectory?: string;
   autoCreateFolders?: boolean;
+  autoBacklinkOnCreate?: boolean;
+  autoBacklinkOnOpen?: boolean;
 }
 
 export default async function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const searchDir = preferences.searchDirectory || '~';
   const autoCreateFolders = preferences.autoCreateFolders ?? false;
+  const autoBacklinkOnCreate = preferences.autoBacklinkOnCreate ?? true;
+  const autoBacklinkOnOpen = preferences.autoBacklinkOnOpen ?? false;
 
   try {
     // 1. Check if Linear is active/viewed
@@ -61,11 +67,26 @@ export default async function Command() {
     // Happy Path: Exactly one result
     if (results.length === 1) {
       await openFolderInFinder(results[0]);
-      await showToast({
-        style: Toast.Style.Success,
-        title: 'Opened Folder',
-        message: results[0],
-      });
+
+      if (autoBacklinkOnOpen) {
+        await showToast({ style: Toast.Style.Animated, title: 'Checking backlink...' });
+        const result = await ensureBacklink(issueId);
+        await handleBacklinkResult(result);
+        if (result.status === 'skipped' || result.status === 'disabled') {
+            await showToast({
+                style: Toast.Style.Success,
+                title: 'Opened Folder',
+                message: results[0],
+            });
+        }
+      } else {
+          await showToast({
+            style: Toast.Style.Success,
+            title: 'Opened Folder',
+            message: results[0],
+          });
+      }
+
       await closeMainWindow();
       return;
     }
@@ -92,11 +113,26 @@ export default async function Command() {
       const folderName = buildIssueFolderName(issueId, issueTitle);
       const newPath = await createIssueFolder(newFolderLocation, folderName);
       await openFolderInFinder(newPath);
-      await showToast({
-        style: Toast.Style.Success,
-        title: 'Created Folder',
-        message: newPath,
-      });
+
+      if (autoBacklinkOnCreate) {
+        await showToast({ style: Toast.Style.Animated, title: 'Creating backlink...' });
+        const result = await ensureBacklink(issueId);
+        await handleBacklinkResult(result);
+        if (result.status === 'skipped' || result.status === 'disabled') {
+             await showToast({
+                style: Toast.Style.Success,
+                title: 'Created Folder',
+                message: newPath,
+            });
+        }
+      } else {
+          await showToast({
+            style: Toast.Style.Success,
+            title: 'Created Folder',
+            message: newPath,
+          });
+      }
+
       await closeMainWindow();
       return;
     }
