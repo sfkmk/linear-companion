@@ -7,23 +7,21 @@ const execFileAsync = promisify(execFile);
 
 /**
  * Escapes a string for use in an MDQuery string literal.
- * In MDQuery, double quotes are escaped by a backslash.
+ * In MDQuery, backslashes are escaped by doubling them and double quotes are escaped by a backslash.
  */
 export function escapeMDQueryString(str: string): string {
-  return str.replace(/"/g, '\\"');
+  return str.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
 }
 
 /**
- * Searches for a folder with the exact name of the Issue ID within the given root directory.
+ * Searches for folders whose name starts with the given Issue ID within the root directory.
  * Uses mdfind (Spotlight) for instant results.
  */
 export async function findIssueFolder(issueId: string, rootDir: string): Promise<string[]> {
   // mdfind query:
   // kMDItemContentType == "public.folder" -> only folders
-  // kMDItemFSName == "issueId" -> exact name match (case insensitive usually, but good for ID)
+  // kMDItemFSName == "issueId*" -> prefix match (supports folders like "ENG-123 Feature Name")
   // -onlyin -> restrict scope
-
-  // Changed to prefix match to support folders like "ENG-123 Feature Name"
   const escapedIssueId = escapeMDQueryString(issueId);
   const query = `kMDItemContentType == "public.folder" && kMDItemFSName == "${escapedIssueId}*"`;
 
