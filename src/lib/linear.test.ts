@@ -1,11 +1,15 @@
-import { expect, test, describe, mock } from 'bun:test';
+import { beforeAll, describe, expect, test, vi } from 'vitest';
 
-// Mock @raycast/utils as it's not available in the environment and depends on AppleScript
-mock.module('@raycast/utils', () => ({
-  runAppleScript: async () => '',
+vi.mock('@raycast/utils', () => ({
+  runAppleScript: vi.fn(async () => ''),
 }));
 
-import { parseLinearTitle, extractIssueId } from './linear';
+let parseLinearTitle!: typeof import('./linear').parseLinearTitle;
+let extractIssueId!: typeof import('./linear').extractIssueId;
+
+beforeAll(async () => {
+  ({ parseLinearTitle, extractIssueId } = await import('./linear'));
+});
 
 describe('parseLinearTitle', () => {
   test('should parse standard ID and title', () => {
