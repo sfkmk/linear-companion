@@ -6,17 +6,24 @@ import { runAppleScript } from '@raycast/utils';
 const execFileAsync = promisify(execFile);
 
 /**
- * Searches for a folder with the exact name of the Issue ID within the given root directory.
+ * Escapes a string for use in an MDQuery string literal.
+ * In MDQuery, backslashes are escaped by doubling them and double quotes are escaped by a backslash.
+ */
+export function escapeMDQueryString(str: string): string {
+  return str.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+}
+
+/**
+ * Searches for folders whose name starts with the given Issue ID within the root directory.
  * Uses mdfind (Spotlight) for instant results.
  */
 export async function findIssueFolder(issueId: string, rootDir: string): Promise<string[]> {
   // mdfind query:
   // kMDItemContentType == "public.folder" -> only folders
-  // kMDItemFSName == "issueId" -> exact name match (case insensitive usually, but good for ID)
+  // kMDItemFSName == "issueId*" -> prefix match (supports folders like "ENG-123 Feature Name")
   // -onlyin -> restrict scope
-
-  // Changed to prefix match to support folders like "ENG-123 Feature Name"
-  const query = `kMDItemContentType == "public.folder" && kMDItemFSName == "${issueId}*"`;
+  const escapedIssueId = escapeMDQueryString(issueId);
+  const query = `kMDItemContentType == "public.folder" && kMDItemFSName == "${escapedIssueId}*"`;
 
   console.log(`[Linear Companion] Searching in: ${rootDir}`);
   console.log(`[Linear Companion] Query: ${query}`);
@@ -40,7 +47,6 @@ export async function findIssueFolder(issueId: string, rootDir: string): Promise
  * Finds all folders that look like Linear Issue folders (start with ID-123).
  */
 export async function findAllIssueFolders(rootDir: string): Promise<{ path: string; issueId: string }[]> {
-  // Pattern: At least 2 letters, hyphen, digits.
   const query = `kMDItemContentType == "public.folder" && kMDItemFSName == "*-[0-9]*"`;
 
   try {
@@ -57,7 +63,7 @@ export async function findAllIssueFolders(rootDir: string): Promise<{ path: stri
       const folderName = path.split('/').pop() || '';
       const match = folderName.match(issueIdRegex);
       if (match) {
-          results.push({ path, issueId: match[1] });
+        results.push({ path, issueId: match[1] });
       }
     }
 
@@ -69,13 +75,22 @@ export async function findAllIssueFolders(rootDir: string): Promise<{ path: stri
 }
 
 /**
+ * Escapes a string for use in an AppleScript string literal.
+ * It escapes backslashes and double quotes.
+ */
+export function escapeAppleScriptString(str: string): string {
+  return str.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+}
+
+/**
  * Opens a folder in Finder using AppleScript to ensure it grabs focus.
  */
 export async function openFolderInFinder(path: string) {
+  const escapedPath = escapeAppleScriptString(path);
   await runAppleScript(`
     tell application "Finder"
       activate
-      open POSIX file "${path}"
+      open POSIX file "${escapedPath}"
     end tell
   `);
 }

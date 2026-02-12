@@ -29,11 +29,13 @@
 ## Tests (Current + How To Run One Test)
 
 - Current state:
-  - No automated test runner configured (no `test` script; no jest/vitest config; no `*.test.*` files).
-- Manual smoke testing (recommended today):
+  - Unit tests are configured with Vitest.
+  - Default command: `npm run test` (runs `vitest run`).
+  - Current suite includes `src/lib/linear.test.ts`.
+- Manual smoke testing (still recommended for command UX):
   - Run `npm run dev`
   - Trigger each Raycast command and verify: toasts, empty states, Finder opening, folder creation.
-- If you add unit tests, prefer Vitest (fast TS support, good DX):
+- Vitest usage:
   - Run all: `npx vitest run`
   - Run one file: `npx vitest run path/to/foo.test.ts`
   - Run one test by name: `npx vitest run -t "test name"`

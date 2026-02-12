@@ -12,7 +12,7 @@ import {
 } from '@raycast/api';
 import React, { useState } from 'react';
 
-import { handleBacklinkResult } from '../lib/backlink-utils';
+import { describeBacklinkResult } from '../lib/backlink-utils';
 import { ensureBacklink } from '../lib/backlinker';
 import { openFolderInFinder } from '../lib/finder';
 import { buildIssueFolderName, createIssueFolder, getNewFolderLocation } from '../lib/folder-creator';
@@ -111,24 +111,18 @@ export function IssueResolver({
       const newPath = await createIssueFolder(parentDir, suggestedName);
       await openFolderInFinder(newPath);
 
+      let backlinkMessage: string | null = null;
       if (autoBacklinkOnCreate) {
         await showToast({ style: Toast.Style.Animated, title: 'Creating backlink...' });
         const result = await ensureBacklink(issueId);
-        await handleBacklinkResult(result);
-        if (result.status === 'skipped' || result.status === 'disabled') {
-            await showToast({
-                style: Toast.Style.Success,
-                title: 'Created Folder',
-                message: newPath,
-            });
-        }
-      } else {
-        await showToast({
-            style: Toast.Style.Success,
-            title: 'Created Folder',
-            message: newPath,
-        });
+        backlinkMessage = describeBacklinkResult(result);
       }
+
+      await showToast({
+        style: Toast.Style.Success,
+        title: 'Created Folder',
+        message: backlinkMessage ? `${newPath} • ${backlinkMessage}` : newPath,
+      });
 
       await closeMainWindow();
     } catch (error) {

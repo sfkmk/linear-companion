@@ -8,7 +8,7 @@ import {
   openExtensionPreferences,
 } from '@raycast/api';
 
-import { handleBacklinkResult } from './lib/backlink-utils';
+import { describeBacklinkResult } from './lib/backlink-utils';
 import { ensureBacklink } from './lib/backlinker';
 import { findIssueFolder, openFolderInFinder } from './lib/finder';
 import { buildIssueFolderName, createIssueFolder, getNewFolderLocation } from './lib/folder-creator';
@@ -68,24 +68,18 @@ export default async function Command() {
     if (results.length === 1) {
       await openFolderInFinder(results[0]);
 
+      let backlinkMessage: string | null = null;
       if (autoBacklinkOnOpen) {
         await showToast({ style: Toast.Style.Animated, title: 'Checking backlink...' });
         const result = await ensureBacklink(issueId);
-        await handleBacklinkResult(result);
-        if (result.status === 'skipped' || result.status === 'disabled') {
-            await showToast({
-                style: Toast.Style.Success,
-                title: 'Opened Folder',
-                message: results[0],
-            });
-        }
-      } else {
-          await showToast({
-            style: Toast.Style.Success,
-            title: 'Opened Folder',
-            message: results[0],
-          });
+        backlinkMessage = describeBacklinkResult(result);
       }
+
+      await showToast({
+        style: Toast.Style.Success,
+        title: 'Opened Folder',
+        message: backlinkMessage ? `${results[0]} • ${backlinkMessage}` : results[0],
+      });
 
       await closeMainWindow();
       return;
@@ -114,24 +108,18 @@ export default async function Command() {
       const newPath = await createIssueFolder(newFolderLocation, folderName);
       await openFolderInFinder(newPath);
 
+      let backlinkMessage: string | null = null;
       if (autoBacklinkOnCreate) {
         await showToast({ style: Toast.Style.Animated, title: 'Creating backlink...' });
         const result = await ensureBacklink(issueId);
-        await handleBacklinkResult(result);
-        if (result.status === 'skipped' || result.status === 'disabled') {
-             await showToast({
-                style: Toast.Style.Success,
-                title: 'Created Folder',
-                message: newPath,
-            });
-        }
-      } else {
-          await showToast({
-            style: Toast.Style.Success,
-            title: 'Created Folder',
-            message: newPath,
-          });
+        backlinkMessage = describeBacklinkResult(result);
       }
+
+      await showToast({
+        style: Toast.Style.Success,
+        title: 'Created Folder',
+        message: backlinkMessage ? `${newPath} • ${backlinkMessage}` : newPath,
+      });
 
       await closeMainWindow();
       return;
