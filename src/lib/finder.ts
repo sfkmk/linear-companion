@@ -23,10 +23,14 @@ export async function findIssueFolder(issueId: string, rootDir: string): Promise
 
   try {
     const { stdout } = await execAsync(`mdfind -onlyin "${rootDir}" '${query}'`);
-    const results = stdout
-      .split('\n')
-      .map((line) => line.trim())
-      .filter((line) => line.length > 0);
+
+    const results: string[] = [];
+    for (const line of stdout.split('\n')) {
+      const trimmed = line.trim();
+      if (trimmed.length > 0) {
+        results.push(trimmed);
+      }
+    }
 
     console.log(`[Linear Companion] Found ${results.length} results:`, results);
     return results;
