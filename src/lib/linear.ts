@@ -24,7 +24,6 @@ export async function getLinearWindowTitle(): Promise<string | null> {
     const result = await runAppleScript(script);
     return result.trim() || null;
   } catch (error) {
-    console.error('Error fetching Linear window title:', error);
     return null;
   }
 }

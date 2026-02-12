@@ -18,9 +18,6 @@ export async function findIssueFolder(issueId: string, rootDir: string): Promise
   // Changed to prefix match to support folders like "ENG-123 Feature Name"
   const query = `kMDItemContentType == "public.folder" && kMDItemFSName == "${issueId}*"`;
 
-  console.log(`[Linear Companion] Searching in: ${rootDir}`);
-  console.log(`[Linear Companion] Query: ${query}`);
-
   try {
     const { stdout } = await execAsync(`mdfind -onlyin "${rootDir}" '${query}'`);
     const results = stdout
@@ -28,10 +25,8 @@ export async function findIssueFolder(issueId: string, rootDir: string): Promise
       .map((line) => line.trim())
       .filter((line) => line.length > 0);
 
-    console.log(`[Linear Companion] Found ${results.length} results:`, results);
     return results;
   } catch (error) {
-    console.error('Spotlight search failed:', error);
     throw new Error('Failed to search file system.');
   }
 }
