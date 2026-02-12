@@ -37,6 +37,69 @@
       "label": "Allow Emojis",
       "description": "Allow emojis in folder names. If unchecked, they will be removed.",
       "default": false
+    },
+    {
+      "name": "linearPat",
+      "type": "password",
+      "required": false,
+      "title": "Linear PAT",
+      "description": "Personal Access Token for Linear API (alternative to OAuth).",
+      "label": "PAT",
+      "placeholder": "lin_api_..."
+    },
+    {
+      "name": "backlinkUrlScheme",
+      "type": "textfield",
+      "required": false,
+      "title": "Backlink URL",
+      "description": "URL scheme for the backlink. Use {issueId} as a placeholder. If empty, backlinking is disabled.",
+      "label": "URL Scheme",
+      "placeholder": "shortcuts://run-shortcut?name=OpenProject&input={issueId}"
+    },
+    {
+      "name": "backlinkTitle",
+      "type": "textfield",
+      "required": false,
+      "title": "Backlink Title",
+      "description": "The title of the link to be created in Linear.",
+      "label": "Title",
+      "default": "Local Folder"
+    },
+    {
+      "name": "autoBacklinkOnCreate",
+      "type": "checkbox",
+      "required": false,
+      "title": "Auto Backlinking",
+      "label": "Create backlink on folder creation",
+      "description": "Automatically add a resource link to the issue when a folder is created.",
+      "default": true
+    },
+    {
+      "name": "autoBacklinkOnOpen",
+      "type": "checkbox",
+      "required": false,
+      "title": "Auto Backlinking",
+      "label": "Create backlink on folder open",
+      "description": "Automatically add a resource link to the issue when a folder is opened.",
+      "default": false
+    },
+    {
+      "name": "oauthClientId",
+      "type": "password",
+      "required": false,
+      "title": "Linear OAuth",
+      "description": "Client ID for Linear OAuth App.",
+      "label": "Client ID",
+      "placeholder": "..."
+    },
+    {
+      "name": "oauthClientSecret",
+      "type": "password",
+      "required": false,
+      "title": "Linear OAuth Secret",
+      "description": "Client Secret for Linear OAuth App (if using Confidential Client).",
+      "label": "Client Secret",
+      "placeholder": "..."
     }
   ],
   "commands": [
@@ -76,9 +139,22 @@
       "title": "Copy Issue ID",
       "description": "Copy the Issue ID from the active Linear window.",
       "mode": "no-view"
+    },
+    {
+      "name": "backlink-all-folders",
+      "title": "Backlink All Issue Folders",
+      "description": "Scans and syncs backlinks for all found issue folders.",
+      "mode": "view"
+    },
+    {
+      "name": "authorize-linear",
+      "title": "Authorize Linear",
+      "description": "Connect to Linear to enable backlinking.",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
+    "@linear/sdk": "^75.0.0",
     "@raycast/api": "^1.104.3",
     "@raycast/utils": "^2.2.2",
     "react": "^19.2.3"

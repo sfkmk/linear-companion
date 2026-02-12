@@ -10,6 +10,8 @@ import {
 } from '@raycast/api';
 import React, { useState } from 'react';
 
+import { describeBacklinkResult } from '../lib/backlink-utils';
+import { ensureBacklink } from '../lib/backlinker';
 import { openFolderInFinder } from '../lib/finder';
 import { createIssueFolder } from '../lib/folder-creator';
 import { removeEmojisPreserveSpaces } from '../utils/text-utils';
@@ -23,11 +25,13 @@ interface CreateFolderFormProps {
 
 interface Preferences {
   allowEmojis?: boolean;
+  autoBacklinkOnCreate?: boolean;
 }
 
 export function CreateFolderForm({ parentDir, issueId, initialName, navigationTitle }: CreateFolderFormProps) {
   const preferences = getPreferenceValues<Preferences>();
   const allowEmojis = preferences.allowEmojis ?? false;
+  const autoBacklinkOnCreate = preferences.autoBacklinkOnCreate ?? true;
   const sanitizeName = (value: string) => (allowEmojis ? value : removeEmojisPreserveSpaces(value));
   const [isLoading, setIsLoading] = useState(false);
   const [name, setName] = useState(() => sanitizeName(initialName).trimStart());
@@ -55,11 +59,20 @@ export function CreateFolderForm({ parentDir, issueId, initialName, navigationTi
     try {
       const newPath = await createIssueFolder(parentDir, preview);
       await openFolderInFinder(newPath);
+
+      let backlinkMessage: string | null = null;
+      if (autoBacklinkOnCreate) {
+        await showToast({ style: Toast.Style.Animated, title: 'Creating backlink...' });
+        const result = await ensureBacklink(issueId);
+        backlinkMessage = describeBacklinkResult(result);
+      }
+
       await showToast({
         style: Toast.Style.Success,
         title: 'Created Folder',
-        message: newPath,
+        message: backlinkMessage ? `${newPath} • ${backlinkMessage}` : newPath,
       });
+
       await closeMainWindow({ popToRootType: PopToRootType.Immediate });
     } catch (error) {
       await showToast({

@@ -44,6 +44,37 @@ export async function findIssueFolder(issueId: string, rootDir: string): Promise
 }
 
 /**
+ * Finds all folders that look like Linear Issue folders (start with ID-123).
+ */
+export async function findAllIssueFolders(rootDir: string): Promise<{ path: string; issueId: string }[]> {
+  const query = `kMDItemContentType == "public.folder" && kMDItemFSName == "*-[0-9]*"`;
+
+  try {
+    const { stdout } = await execFileAsync('mdfind', ['-onlyin', rootDir, query]);
+    const paths = stdout
+      .split('\n')
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0);
+
+    const results: { path: string; issueId: string }[] = [];
+    const issueIdRegex = /\b([A-Z]{2,5}-\d{1,5})\b/;
+
+    for (const path of paths) {
+      const folderName = path.split('/').pop() || '';
+      const match = folderName.match(issueIdRegex);
+      if (match) {
+        results.push({ path, issueId: match[1] });
+      }
+    }
+
+    return results;
+  } catch (error) {
+    console.error('Spotlight search failed:', error);
+    throw new Error('Failed to scan file system.');
+  }
+}
+
+/**
  * Escapes a string for use in an AppleScript string literal.
  * It escapes backslashes and double quotes.
  */
